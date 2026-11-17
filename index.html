@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clutch Index – performance under pressure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#E8ECE9;--panel:#F8F9F7;--ink:#12263A;--mute:#5B6B79;--line:#CBD3CE;--red:#C2281D;--turf:#2E7D5B;--r:6px}
+@media (prefers-color-scheme:dark){:root{--bg:#0F1A24;--panel:#162433;--ink:#E6ECEF;--mute:#8FA1AE;--line:#2A3B4B;--red:#F0594D;--turf:#4DB88A}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 Archivo,system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px}
+h1{font:800 clamp(34px,6vw,64px)/.95 Archivo;font-stretch:62%;letter-spacing:-.01em;margin:0 0 10px}
+h2{font:700 20px Archivo;margin:0 0 12px}.lede{max-width:62ch;color:var(--mute);margin:0 0 26px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-bottom:18px}
+.drop{border:2px dashed var(--line);border-radius:var(--r);padding:26px;text-align:center;cursor:pointer;transition:.15s}
+.drop.on,.drop:hover{border-color:var(--red);background:color-mix(in srgb,var(--red) 6%,transparent)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.chip{border:1px solid var(--line);border-radius:99px;padding:3px 12px;font-size:13px}
+.chip b{color:var(--turf)}.chip.bad b{color:var(--red)}
+.set{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-top:18px}
+label{display:block;font-size:13px;color:var(--mute)}label output{color:var(--ink);font-weight:700}
+input[type=range]{width:100%;accent-color:var(--red)}
+button{font:700 15px Archivo;border:0;border-radius:var(--r);padding:12px 22px;background:var(--red);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:6px 12px;font-size:13px}
+button:disabled{opacity:.5;cursor:wait}:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.err{color:var(--red);font-weight:600;margin-top:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px}.kpi small{color:var(--mute);display:block}.kpi strong{font:700 26px Archivo}
+.tabs{display:flex;gap:6px;margin-bottom:12px;align-items:center}.tab{background:transparent;color:var(--mute);border:1px solid var(--line)}.tab[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sp{flex:1}.row{display:grid;grid-template-columns:34px minmax(140px,1.1fr) minmax(220px,2fr) 70px;gap:14px;align-items:center;padding:11px 8px;border-top:1px solid var(--line);cursor:pointer;width:100%;text-align:left;background:none;color:inherit;font:inherit;border-radius:0}
+.row:hover,.row[aria-expanded=true]{background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.rk{font:800 22px Archivo;font-stretch:62%}.nm{font-weight:700}.tm{font-size:12px;color:var(--mute)}
+.track{position:relative;height:26px}.track:before{content:"";position:absolute;left:0;right:0;top:12px;height:2px;background:var(--line)}
+.link{position:absolute;top:11px;height:4px;border-radius:2px}.dot{position:absolute;top:5px;width:16px;height:16px;border-radius:50%;margin-left:-8px}
+.dot.b{border:2px solid var(--mute);background:var(--panel)}.dot.p{background:var(--red)}
+.sc{text-align:right;font:700 17px Archivo}.hd{display:grid;grid-template-columns:34px minmax(140px,1.1fr) minmax(220px,2fr) 70px;gap:14px;padding:0 8px 8px;font-size:12px;color:var(--mute)}
+.legend{display:flex;gap:18px;font-size:13px;color:var(--mute);margin:0 0 10px}.legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.det{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;padding:12px 8px 16px 56px;font-size:13px}.det span{color:var(--mute);display:block}.det b{font-size:16px}
+table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:6px 8px;text-align:right;border-top:1px solid var(--line)}th:first-child,td:first-child{text-align:left}th{color:var(--mute);font-weight:600;font-size:12px}
+details{color:var(--mute);max-width:80ch}summary{cursor:pointer;color:var(--ink);font-weight:700}
+.hidden{display:none}@media(max-width:700px){.row,.hd{grid-template-columns:28px 1fr 56px}.track,.hd .tk{display:none}.det{padding-left:8px}}
+</style></head><body><div class="wrap">
+<h1>Clutch Index</h1>
+<p class="lede">Upload your match files. The model finds the batters and bowlers who deliver when the game is tight, and shows whether each one rises or fades against their own normal.</p>
+
+<section class="panel" aria-label="Upload">
+ <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose CSV files"><strong>Drop all CSV files here</strong><br><span style="color:var(--mute)">ball-by-ball, matches, competitions, player mapping (playing XI and teams are optional). Files are recognised by their columns, not their names.</span>
+ <input id="file" type="file" accept=".csv" multiple hidden></div>
+ <div class="chips" id="chips"></div>
+ <div class="set">
+  <label>Pressure threshold: top <output id="o1">25</output>% of situations<input id="pp" type="range" min="10" max="50" value="25"></label>
+  <label>Minimum pressure balls <output id="o2">60</output><input id="mb" type="range" min="20" max="200" step="10" value="60"></label>
+  <label>Minimum matches <output id="o3">6</output><input id="mm" type="range" min="3" max="20" value="6"></label>
+  <label>Wicket worth <output id="o4">15</output> runs<input id="wr" type="range" min="8" max="30" value="15"></label>
+ </div>
+ <p style="margin:18px 0 0"><button id="run" disabled>Run analysis</button></p><div class="err" id="err" role="alert"></div>
+</section>
+
+<div id="res" class="hidden">
+ <div class="kpis" id="kpis"></div>
+ <section class="panel"><div class="tabs" role="tablist"><button class="tab" role="tab" id="tb-bat" aria-selected="true">Batters</button><button class="tab" role="tab" id="tb-bowl" aria-selected="false">Bowlers</button><span class="sp"></span><a id="dl"><button class="ghost" type="button">Download full table (CSV)</button></a></div>
+  <p class="legend"><span><i style="border:2px solid var(--mute)"></i>Usual level</span><span><i style="background:var(--red)"></i>Under pressure</span><span id="unit"></span></p>
+  <div class="hd"><span>#</span><span>Player</span><span class="tk" id="axis"></span><span style="text-align:right">Score</span></div><div id="list"></div>
+  <p style="font-size:12px;color:var(--mute);margin:12px 0 0" id="rel"></p></section>
+ <section class="panel"><h2>Does the pressure definition separate tough moments from ordinary ones?</h2><div style="overflow:auto"><table id="ctx"></table></div></section>
+</div>
+
+<section class="panel"><details><summary>How pressure and scores are calculated</summary>
+<p><b>Pressure index (0–1) for every delivery.</b> Chasing: 45% required run rate (absolute and versus current rate), 30% wickets lost, 25% how late in the innings. Setting a total: 45% wickets lost, 35% how late, 20% scoring behind par. Knockout matches add 0.08. Balls above the chosen percentile within each format and innings are “pressure”.</p>
+<p><b>Value per ball.</b> Runs and wickets are compared with the league average for the same format, innings, phase and pressure level, so a player is only credited for beating peers in the same spot. A wicket is worth the chosen number of runs.</p>
+<p><b>Score.</b> 60% pressure value per 100 balls (shrunk toward zero for small samples), 20% change from the player’s own non-pressure value, 20% share of matches with positive pressure impact. Players below the ball and match minimums are not ranked.</p></details></section>
+</div>
+<script>
+const $=s=>document.querySelector(s);let files=[],data=null,side="bat";
+const drop=$("#drop"),inp=$("#file");
+drop.onclick=()=>inp.click();drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" ")inp.click()};
+["dragover","dragenter"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add("on")}));
+["dragleave","drop"].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove("on")}));
+drop.addEventListener("drop",e=>add(e.dataTransfer.files));inp.onchange=()=>add(inp.files);
+function add(l){for(const f of l)if(/\.csv$/i.test(f.name)&&!files.some(x=>x.name===f.name))files.push(f);draw()}
+function draw(res){$("#chips").innerHTML=files.map(f=>{const r=res&&res.find(x=>x.file===f.name);return `<span class="chip ${r&&!r.detected?'bad':''}">${f.name} <b>${r?(r.detected?"· "+r.detected:"· not recognised"):""}</b></span>`}).join("");$("#run").disabled=!files.length}
+[["pp","o1"],["mb","o2"],["mm","o3"],["wr","o4"]].forEach(([a,b])=>$("#"+a).oninput=e=>$("#"+b).textContent=e.target.value);
+$("#run").onclick=async()=>{const b=$("#run");b.disabled=true;b.textContent="Analysing…";$("#err").textContent="";
+ const fd=new FormData();files.forEach(f=>fd.append("files",f));fd.append("pressure_pct",100-$("#pp").value);fd.append("min_balls",$("#mb").value);fd.append("min_matches",$("#mm").value);fd.append("wicket_runs",$("#wr").value);
+ if(location.protocol==="file:"){$("#err").textContent="This page was opened as a file. Start the server with python app.py, then open http://localhost:5000 in your browser.";b.disabled=false;b.textContent="Run analysis";return}
+ try{const r=await fetch("/api/analyze",{method:"POST",body:fd});const t=await r.text();let j;try{j=JSON.parse(t)}catch(_){j=null}
+  if(!j){$("#err").textContent=`Server error (${r.status}). Check the terminal running app.py for details.`}
+  else if(!r.ok){$("#err").textContent=j.error;draw(j.files)}else{data=j;draw(j.files);show()}}
+ catch(e){$("#err").textContent="Could not reach the server. Make sure python app.py is still running in your terminal (it may have stopped on an error), and that you opened http://localhost:5000, not the HTML file."}
+ b.disabled=false;b.textContent="Run analysis"};
+const n=(x,d=1)=>x==null?"–":Number(x).toLocaleString(undefined,{maximumFractionDigits:d});
+function show(){$("#res").classList.remove("hidden");const m=data.meta;
+ $("#kpis").innerHTML=[["Matches",n(m.matches,0)],["Deliveries",n(m.deliveries,0)],["Pressure share",n(m.pressure_share*100,0)+"%"],["Batting reliability",data.bat.reliability??"–"],["Bowling reliability",data.bowl.reliability??"–"]].map(([a,b])=>`<div class="kpi"><small>${a}</small><strong>${b}</strong></div>`).join("");
+ $("#ctx").innerHTML="<tr><th>Situation</th><th>Balls</th><th>Avg pressure index</th><th>Strike rate</th><th>Dismissals / 100 balls</th></tr>"+data.context.map(c=>`<tr><td>${c.innings==1?"Setting":"Chasing"} · ${c.pressure?"pressure":"ordinary"}</td><td>${n(c.balls,0)}</td><td>${c.avg_pi}</td><td>${c.strike_rate}</td><td>${c.dismissal_per_100}</td></tr>`).join("");
+ list()}
+function list(){const d=data[side],rows=d.rows.slice(0,10),bat=side==="bat";
+ $("#tb-bat").ariaSelected=bat;$("#tb-bowl").ariaSelected=!bat;$("#tb-bat").setAttribute("aria-selected",bat);$("#tb-bowl").setAttribute("aria-selected",!bat);
+ $("#dl").href=`/api/download/${side}.csv`;$("#unit").textContent=bat?"Strike rate (runs per 100 balls)":"Economy (runs per over)";
+ $("#rel").textContent=`Split-half reliability (odd vs even matches): ${d.reliability??"n/a"}. Near zero means the ranking is mostly noise; above about 0.3 shows real repeatable skill. ${d.rows.length} players met the minimums.`;
+ if(!rows.length){$("#list").innerHTML="<p>No players met the minimums. Lower the minimum balls or matches.</p>";return}
+ const v=rows.flatMap(r=>[r.pressure_rate,r.baseline_rate??r.pressure_rate]),lo=Math.min(...v),hi=Math.max(...v),pos=x=>((x-lo)/(hi-lo||1))*92+4;
+ $("#axis").textContent=`${n(lo,0)} … ${n(hi,0)}`;
+ $("#list").innerHTML=rows.map((r,i)=>{const a=pos(r.baseline_rate??r.pressure_rate),b=pos(r.pressure_rate),good=bat?r.pressure_rate>=(r.baseline_rate??0):r.pressure_rate<=(r.baseline_rate??1e9);
+ return `<button class="row" aria-expanded="false" data-i="${i}"><span class="rk">${r.rank}</span><span><span class="nm">${r.name}</span><br><span class="tm">${r.team}${r.usual_position?` · bats ~${r.usual_position}`:""}</span></span>
+ <span class="track"><span class="link" style="left:${Math.min(a,b)}%;width:${Math.abs(a-b)}%;background:${good?"var(--turf)":"var(--red)"}"></span><span class="dot b" style="left:${a}%"></span><span class="dot p" style="left:${b}%"></span></span><span class="sc">${r.score}</span></button><div class="det hidden" id="d${i}">
+ <div><span>Pressure balls</span><b>${r.pressure_balls}</b></div><div><span>Matches</span><b>${r.matches}</b></div><div><span>${bat?"Dismissals":"Wickets"}</span><b>${r.events}</b></div><div><span>${bat?"SR":"Econ"} pressure / usual</span><b>${r.pressure_rate} / ${r.baseline_rate??"–"}</b></div><div><span>Value per 100 balls</span><b>${r.value_per_100}</b></div><div><span>Change vs own usual</span><b>${r.delta}</b></div><div><span>Matches positive</span><b>${Math.round(r.consistency*100)}%</b></div></div>`}).join("");
+ document.querySelectorAll(".row").forEach(el=>el.onclick=()=>{const o=el.getAttribute("aria-expanded")==="true";el.setAttribute("aria-expanded",!o);$("#d"+el.dataset.i).classList.toggle("hidden",o)})}
+$("#tb-bat").onclick=()=>{side="bat";list()};$("#tb-bowl").onclick=()=>{side="bowl";list()};
+</script></body></html>
